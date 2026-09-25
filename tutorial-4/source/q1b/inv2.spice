@@ -1,8 +1,0 @@
-** sch_path: /home/student/ee5311/tutorial_4/q1b/inv2.sch
-.subckt inv2 DVDD out V_meas in DGND
-*.PININFO in:I DVDD:B DGND:B out:O V_meas:B
-XM1 V_meas in DVDD DVDD sky130_fd_pr__pfet_01v8 L=0.15 W=0.84 nf=1
-XM2 V_meas in DGND DGND sky130_fd_pr__nfet_01v8 L=0.15 W=0.42 nf=1
-XM3 out V_meas DVDD DVDD sky130_fd_pr__pfet_01v8 L=0.15 W=0.84 nf=1
-XM4 out V_meas DGND DGND sky130_fd_pr__nfet_01v8 L=0.15 W=0.42 nf=1
-.ends
