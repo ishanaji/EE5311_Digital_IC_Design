@@ -1,6 +1,6 @@
 # EE5311 Digital IC Design — Tutorials
 
-Reports and design source files (Xschem/ngspice schematics, symbols, and Magic GDS layouts) for the EE5311 Digital IC Design course tutorials, using the SkyWater 130nm PDK. Each tutorial's raw tool-generated output (DRC/LVS databases, parasitic-extraction intermediates, extracted netlists) has been left out — only the authored schematics, symbols, layouts, testbenches, scripts, and simulation-result data are kept.
+These are my tutorial solutions for EE5311 - Digital IC Design at IIT Madras done in Jul-Nov 2026 semester under Prof. Ramprasath. Reports and design source files (Xschem/ngspice schematics, symbols, and Magic GDS layouts) for the course tutorials, using the SkyWater 130nm PDK are included. 
 
 | Tutorial | Topic | Report | Source |
 |---|---|---|---|
