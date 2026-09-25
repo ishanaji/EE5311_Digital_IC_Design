@@ -1,0 +1,72 @@
+** sch_path: /home/student/ee5311/tutorial_3/q2c.sch
+**.subckt q2c
+x1 net1 Vout q1
+x2 net2 net1 q1
+x3 net3 net2 q1
+x4 net4 net3 q1
+x5 net5 net4 q1
+x6 net6 net5 q1
+x7 net8 net6 q1
+Vdd1 VDD 0 {VDDVAL}
+x8 net7 net8 q1
+x9 Vout net7 q1
+**** begin user architecture code
+
+* 7-stage ring oscillator - Question 2(b): freq vs VDD
+.param width_p = 0.84
+.param VDDVAL  = 1.8
+.ic v(Vout)=0
+.saveall
+
+.control
+  let n = 9                     ; number of VDD points
+  let vdd_arr    = unitvec(n)
+  let freq_arr   = unitvec(n)
+  let period_arr = unitvec(n)
+  let idx = 0
+
+  foreach vdd 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8
+    alterparam VDDVAL = $vdd
+    reset
+    tran 1p 100n uic
+
+    meas tran t_r1 when v(Vout)=0.4 rise=3
+    meas tran t_r2 when v(Vout)=0.4 rise=4
+    let period = t_r2 - t_r1
+    let freq   = 1/period
+
+    let vdd_arr[$&idx]    = $vdd
+    let freq_arr[$&idx]   = freq
+    let period_arr[$&idx] = period
+
+    let idx = idx + 1
+  end
+
+  * plot inside ngspice
+  plot freq_arr vs vdd_arr
+  plot period_arr vs vdd_arr
+
+  * also dump to disk for python/excel post-processing
+  wrdata freq_vs_vdd.txt   vdd_arr freq_arr
+  wrdata period_vs_vdd.txt vdd_arr period_arr
+.endc
+
+.lib /cad/share/pdk/sky130B/libs.tech/combined/sky130.lib.spice tt
+**** end user architecture code
+**.ends
+
+* expanding   symbol:  q1.sym # of pins=2
+** sym_path: /home/student/ee5311/tutorial_3/q1.sym
+** sch_path: /home/student/ee5311/tutorial_3/q1.sch
+.subckt q1 out in
+*.ipin in
+*.opin out
+XM1 out in VDD VDD sky130_fd_pr__pfet_01v8 L=0.15 W={width_p} nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29'
++ pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=1
+XM2 out in GND GND sky130_fd_pr__nfet_01v8 L=0.15 W=0.42 nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)'
++ ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=1
+.ends
+
+.GLOBAL VDD
+.GLOBAL GND
+.end

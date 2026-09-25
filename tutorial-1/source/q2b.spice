@@ -1,0 +1,28 @@
+** sch_path: /home/student/ee5311/tutorial_1/q2b.sch
+**.subckt q2b
+Vdd1 VDD GND 1.8
+Vin1 Vin GND 1.8
+XM1 net1 Vin VDD VDD sky130_fd_pr__pfet_01v8 L=0.15 W=0.42 nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)'
++ ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=1
+Vd1 net1 0 1.8
+**** begin user architecture code
+.lib /cad/share/pdk/sky130B/libs.tech/combined/sky130.lib.spice tt
+
+.control
+let Vsg = 1.8 - 0.6
+repeat 4
+  alter Vin1 $&Vsg
+  dc Vd1 0 1.8 0.02
+  let Vsg = Vsg - 0.4
+end
+plot dc1.I(Vdd1)*-1 dc2.I(Vdd1)*-1 dc3.I(vdd1)*-1 dc4.I(Vdd1)*-1
+set filetype=ascii
+wrdata nmos_ids_vds.txt dc1.I(Vdd1)*-1 dc2.I(Vdd1)*-1 dc3.I(vdd1)*-1 dc4.I(Vdd1)*-1
+.endc
+
+**** end user architecture code
+**.ends
+.GLOBAL VDD
+.GLOBAL GND
+.GLOBAL Vin
+.end

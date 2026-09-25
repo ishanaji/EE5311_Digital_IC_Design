@@ -1,0 +1,28 @@
+** sch_path: /home/student/ee5311/tutorial_2/q2b.sch
+**.subckt q2b
+V1 Vin 0 1.8
+XM1 Vout Vin 0 GND sky130_fd_pr__nfet_01v8 L=0.15 W=0.42 nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)'
++ ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=1
+XM2 Vout 0 VDD VDD sky130_fd_pr__pfet_01v8 L=0.60 W=0.832 nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)'
++ ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=1
+V2 VDD 0 1.8
+**** begin user architecture code
+.lib /cad/share/pdk/sky130B/libs.tech/combined/sky130.lib.spice tt
+
+.control
+save all
+dc V1 0 1.8 0.01
+let deriv1 = deriv(v(Vout))
+plot v(Vout) v(Vin)
+meas dc Vil FIND v(Vin) WHEN deriv1 = -1 CROSS=1
+meas dc Vih FIND v(Vin) WHEN deriv1 = -1 CROSS=2
+meas dc Voh FIND v(Vout) WHEN deriv1 = -1 CROSS=1
+meas dc Vol FIND v(Vout) WHEN deriv1 = -1 CROSS=2
+let nmh = Voh - Vih
+let nml = Vil - Vol
+echo NMH: $&nmh  NML: $&nml
+.endc
+
+**** end user architecture code
+**.ends
+.end

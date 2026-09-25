@@ -1,0 +1,97 @@
+** sch_path: /home/student/ee5311/tutorial_6/pet_dff_tb1_rise.sch
+**.subckt pet_dff_tb1_rise
+Vdd1 VDD 0 1.8
+Vclk1 CLK 0 PULSE(0 1.8 10n 5p 5p 9.99n 20n)
+Vclkb1 CLKB 0 PULSE(1.8 0 10n 5p 5p 9.99n 20n)
+Vin1 D 0 PULSE(0 1.8 {t_start} 5p 5p 19.99n 30n)
+x1 CLKB CLK D Q VDD 0 net1 pet_dff
+x2 VDD Q net2 0 inv
+**** begin user architecture code
+.lib /cad/share/pdk/sky130B/libs.tech/combined/sky130.lib.spice tt
+
+.param t_start=9.8n
+.control
+let N=29
+let index=0
+let tdq_vec = vector(N)
+let tdc_vec = vector(N)
+let tcq_vec = vector(N)
+let ts_vec = vector(N)
+while index < N
+	let ts = 9.8n + ((index)*5p)
+	alterparam t_start = $&ts
+	reset
+	tran 0.01n 20n
+	meas tran tdq trig v(D) val=0.9 rise=1 targ v(Q) val=0.9 rise=1
+	meas tran tdc trig v(D) val=0.9 rise=1 targ v(CLK) val=0.9 rise=1
+	meas tran tcq trig v(CLK) val=0.9 rise=1 targ v(Q) val=0.9 rise=1
+	let tdq_vec[index] = $&tdq
+	let tdc_vec[index] = $&tdc
+	let tcq_vec[index] = $&tcq
+	let ts_vec[index] = $&ts
+	let index = index + 1
+end
+plot tran1.v(CLK) tran1.v(D) tran1.v(Q)
+plot tran19.v(CLK) tran19.v(D) tran19.v(Q)
+plot tran29.v(CLK) tran29.v(D) tran29.v(Q)
+plot tdq_vec vs ts_vec
+plot tdc_vec vs ts_vec
+plot tcq_vec vs ts_vec
+print tdq_vec tdc_vec tcq_vec > time_data_rise.txt
+.endc
+
+**** end user architecture code
+**.ends
+
+* expanding   symbol:  pet_dff.sym # of pins=7
+** sym_path: /home/student/ee5311/tutorial_6/pet_dff.sym
+** sch_path: /home/student/ee5311/tutorial_6/pet_dff.sch
+.subckt pet_dff CLKB CLK D Q DVDD DGND QB
+*.ipin D
+*.opin Q
+*.ipin CLK
+*.ipin CLKB
+*.iopin DVDD
+*.iopin DGND
+*.opin QB
+XM1 net1 CLK net2 net2 sky130_fd_pr__nfet_01v8 L=0.15 W=0.42 nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29'
++ pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=1
+XM2 net2 CLKB net1 net1 sky130_fd_pr__pfet_01v8 L=0.15 W=0.42 nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29'
++ pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=1
+XM3 net3 CLKB net2 net2 sky130_fd_pr__nfet_01v8 L=0.15 W=0.42 nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29'
++ pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=1
+XM4 net2 CLK net3 net3 sky130_fd_pr__pfet_01v8 L=0.15 W=0.42 nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29'
++ pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=1
+XM5 net5 CLKB QB QB sky130_fd_pr__nfet_01v8 L=0.15 W=0.42 nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)'
++ ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=1
+XM6 QB CLK net5 net5 sky130_fd_pr__pfet_01v8 L=0.15 W=0.42 nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)'
++ ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=1
+XM7 net6 CLK QB QB sky130_fd_pr__nfet_01v8 L=0.15 W=0.42 nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)'
++ ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=1
+XM8 QB CLKB net6 net6 sky130_fd_pr__pfet_01v8 L=0.15 W=0.42 nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29'
++ pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=1
+x1 DVDD net4 net1 DGND inv
+x2 DVDD D net3 DGND inv
+x3 DVDD net2 net4 DGND inv
+x4 DVDD net7 net5 DGND inv
+x5 DVDD net4 net6 DGND inv
+x6 DVDD QB Q DGND inv
+x7 DVDD QB net7 DGND inv
+.ends
+
+
+* expanding   symbol:  inv.sym # of pins=4
+** sym_path: /home/student/ee5311/tutorial_6/inv.sym
+** sch_path: /home/student/ee5311/tutorial_6/inv.sch
+.subckt inv DVDD in out DGND
+*.iopin DVDD
+*.iopin DGND
+*.ipin in
+*.opin out
+XM1 out in DVDD DVDD sky130_fd_pr__pfet_01v8 L=0.15 W=0.84 nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)'
++ ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=1
+XM2 out in DGND DGND sky130_fd_pr__nfet_01v8 L=0.15 W=0.42 nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)'
++ ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=1
+.ends
+
+.end

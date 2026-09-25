@@ -1,0 +1,36 @@
+** sch_path: /home/student/ee5311/tutorial_1/q2a.sch
+**.subckt q2a
+XM1 Vin Vin VDD VDD sky130_fd_pr__pfet_01v8 L=0.15 W=0.42 nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)'
++ ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=1
+Vin1 Vin 0 1.8
+Vdd VDD 0 1.8
+**** begin user architecture code
+.lib /cad/share/pdk/sky130B/libs.tech/combined/sky130.lib.spice tt
+
+.control
+save all
+dc Vin1 0 1.8 0.01
+let mu = 0.008
+let WbyL = 0.42/0.15
+let Cox = 0.00834
+let Vth = 0.7
+let vsat = 8e4
+
+let Vsg = v(VDD)-v(Vin)
+let Vsd = Vsg
+
+let lambdan = 0.2
+let EcL = 2*vsat * 0.15e-6/mu
+let Vgt = max(Vsg - Vth, 0)
+
+let Vdsat = (Vgt)*EcL/(Vgt + EcL)
+let Vmin = min(Vsg, Vdsat)
+let idfit = 0.5*mu*Cox*WbyL*EcL*(Vgt^2)*(1 + lambdan * Vsd)/(Vgt + EcL)
+set filetype=ascii
+wrdata pmos_ids_vgs.txt -I(VDD) idfit
+plot -I(VDD) idfit
+.endc
+
+**** end user architecture code
+**.ends
+.end

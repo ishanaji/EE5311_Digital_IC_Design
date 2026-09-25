@@ -1,0 +1,20 @@
+** sch_path: /home/student/ee5311/tutorial_1/q3d.sch
+**.subckt q3d
+C1 Vout 0 100f
+Vstep Vin 0 PULSE(1.8 0 5n 10p 10p)
+XM1 Vin 0 Vout VDD sky130_fd_pr__pfet_01v8 L=0.15 W=0.42 nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)'
++ ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=1
+**** begin user architecture code
+
+.ic v(Vout)=1.8
+.control
+  tran 1n 120n
+  plot v(Vin) v(Vout)
+  meas tran vout_20ns FIND v(Vout) AT=25n
+  meas tran vout_100ns FIND v(Vout) AT=105n
+.endc
+
+.lib /cad/share/pdk/sky130B/libs.tech/combined/sky130.lib.spice tt
+**** end user architecture code
+**.ends
+.end

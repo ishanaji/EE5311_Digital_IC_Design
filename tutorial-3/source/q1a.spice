@@ -1,0 +1,46 @@
+** sch_path: /home/student/ee5311/tutorial_3/q1a.sch
+**.subckt q1a
+x1 Vout Vin q1
+x2 net1 Vout q1
+Vin1 Vin GND PULSE(0 1.8 10ps 5ps 5ps 100ps 250ps)
+Vdd1 VDD GND 1.8
+**** begin user architecture code
+.lib /cad/share/pdk/sky130B/libs.tech/combined/sky130.lib.spice tt
+
+.param width_p = 0.42
+.control
+foreach wp 0.42 0.84 1.26
+  alterparam width_p = $wp
+  reset
+  tran 0.1p 250p
+
+  meas tran thl trig v(Vin) val=0.9 rise=1 targ v(Vout) val=0.9 fall=1
+  meas tran tlh trig v(Vin) val=0.9 fall=1 targ v(Vout) val=0.9 rise=1
+  let delay = ($&thl + $&tlh) / 2
+  echo w : $wp delay : $&delay
+
+  plot v(Vout) v(Vin) title 'Wp = $wp um'
+end
+
+* wp=0.42 -> tran1, wp=0.84 -> tran2, wp=1.26 -> tran3 (loop order)
+plot tran1.v(Vout) tran2.v(Vout) tran3.v(Vout) xlabel 'time' ylabel 'Vout' title 'Vout vs Wp'
+.endc
+
+**** end user architecture code
+**.ends
+
+* expanding   symbol:  q1.sym # of pins=2
+** sym_path: /home/student/ee5311/tutorial_3/q1.sym
+** sch_path: /home/student/ee5311/tutorial_3/q1.sch
+.subckt q1 out in
+*.ipin in
+*.opin out
+XM1 out in VDD VDD sky130_fd_pr__pfet_01v8 L=0.15 W={width_p} nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29'
++ pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=1
+XM2 out in GND GND sky130_fd_pr__nfet_01v8 L=0.15 W=0.42 nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)'
++ ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=1
+.ends
+
+.GLOBAL GND
+.GLOBAL VDD
+.end

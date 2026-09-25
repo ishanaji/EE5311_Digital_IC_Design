@@ -1,0 +1,90 @@
+** sch_path: /home/student/ee5311/tutorial_3/qn_1_b.sch
+**.subckt qn_1_b
+V1 Vin 0 PULSE(0 {VDDval} 0ps 5ps 5ps 300ps 600ps)
+V2 VDD 0 {VDDval}
+x1 Vout Vin net1 inv_gnd
+Vmeas net1 0 0
+.save i(vmeas)
+x2 net2 Vout q1
+**** begin user architecture code
+
+
+.param Width_p = 0.84
+.param VDDval = 1.8
+.save all
+.control
+let N = 9
+let index = 0
+let vddvec = vector(N)
+let tpvec = vector(N)
+let edpvec = vector(N)
+let tp_ana_vec = vector(N)
+let edp_ana_vec = vector(N)
+let CL = 3.8e-15
+let Vtn = 0.7
+let Vtp = 0.7
+let WnbyL = 0.42 / 0.15
+let WpbyL = 0.84 / 0.15
+let Kn = 0.00010425
+let Kp = 0.00003672
+let EcnL = 0.96
+let EcpL = 1.00
+while index < N
+   let vddv = 1.0 + (index * 0.1)
+   let v50 = vddv / 2
+   alterparam VDDval = $&vddv
+   reset
+   tran 1p 600p
+   meas tran thl trig v(Vin) val=$&v50 rise=1 targ v(Vout) val=$&v50 fall=1
+   meas tran tlh trig v(Vin) val=$&v50 fall=1 targ v(Vout) val=$&v50 rise=1
+   meas tran iinteg integ i(vmeas)
+   let const.vddvec[index] = vddv
+   let const.tpvec[index] = ($&thl + $&tlh) / 2
+   let const.edpvec[index] = $&iinteg * vddv * const.tpvec[index]
+   let tphl_ana = 0.5 * (CL * vddv * (EcnL + vddv - Vtn)) / (Kn * WnbyL * ((vddv - Vtn)^2) * EcnL)
+   let tplh_ana = 0.5 * (CL * vddv * (EcpL + vddv - Vtp)) / (Kp * WpbyL * ((vddv - Vtp)^2) * EcpL)
+   let tp_ana = (tphl_ana + tplh_ana) / 2
+   let const.tp_ana_vec[index] = tp_ana
+   let const.edp_ana_vec[index] = CL * (vddv^2) * tp_ana
+   let index = index + 1
+end
+setplot const
+print vddvec tpvec tp_ana_vec edpvec edp_ana_vec > edp_vdd_data.txt
+plot tpvec tp_ana_vec vs vddvec
+plot edpvec edp_ana_vec vs vddvec
+.endc
+.end
+
+.lib /cad/share/pdk/sky130B/libs.tech/combined/sky130.lib.spice tt
+**** end user architecture code
+**.ends
+
+* expanding   symbol:  inv_gnd.sym # of pins=3
+** sym_path: /home/student/ee5311/tutorial_3/inv_gnd.sym
+** sch_path: /home/student/ee5311/tutorial_3/inv_gnd.sch
+.subckt inv_gnd out in Ignd
+*.ipin in
+*.opin out
+*.iopin Ignd
+XM1 out in Ignd GND sky130_fd_pr__nfet_01v8 L=0.15 W=0.42 nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)'
++ ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=1
+XM2 out in VDD VDD sky130_fd_pr__pfet_01v8 L=0.15 W={width_p} nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29'
++ pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=1
+.ends
+
+
+* expanding   symbol:  q1.sym # of pins=2
+** sym_path: /home/student/ee5311/tutorial_3/q1.sym
+** sch_path: /home/student/ee5311/tutorial_3/q1.sch
+.subckt q1 out in
+*.ipin in
+*.opin out
+XM1 out in VDD VDD sky130_fd_pr__pfet_01v8 L=0.15 W={width_p} nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29'
++ pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=1
+XM2 out in GND GND sky130_fd_pr__nfet_01v8 L=0.15 W=0.42 nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29' pd='2*int((nf+1)/2) * (W/nf + 0.29)'
++ ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W' sa=0 sb=0 sd=0 mult=1
+.ends
+
+.GLOBAL VDD
+.GLOBAL GND
+.end
